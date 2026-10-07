@@ -29,7 +29,7 @@ K210 摄像头拍照 ──USB串口(COM5)──▶ PC 端识别（OpenCV + HSV 
 ```
 
 - **校赛形态**：K210 直接连 PC，识别与坐标解算全部在 PC 完成，STM32 只负责运动控制（有线，稳定优先）。
-- **最终形态**：力争 K210 与 STM32 直连（USART3 已预留，尚未启用），并评估 ESP 无线链路（见 `11_ESP无线/`）。
+- **最终形态**：力争 K210 与 STM32 直连（USART3 已预留，尚未启用），并评估 ESP 无线链路（见 `11_ESP无线调试/`）。
 
 ## 三、硬件配置
 
@@ -59,7 +59,6 @@ K210 摄像头拍照 ──USB串口(COM5)──▶ PC 端识别（OpenCV + HSV 
 
 | 目录 | 内容 |
 |---|---|
-| `00_待办与拍板/` | 待拍板事项、调试清单（docx + md 双格式） |
 | `01_规则与命题/` | 官方规则 PDF、规则要点提取、物料图鉴 |
 | `02_方案与说明书/` | 制作思路、校选方案说明书、阶段成果汇报 |
 | `03_设计与尺寸/` | 夹爪设计参数、框架与布局尺寸 |
@@ -67,11 +66,10 @@ K210 摄像头拍照 ──USB串口(COM5)──▶ PC 端识别（OpenCV + HSV 
 | `05_工具与校核/` | 布局校核、物料分析、STL/图纸小工具 |
 | `06_参考与开源/` | 参考项目（SO-ARM 夹爪等） |
 | `07_概念图/` | 框架结构概念图 |
-| `08_发给队友/` | 打包发给队友的设计包 |
 | `09_固件/` | **STM32 固件**：`src/`（C 源码）、`keil/`（Keil 工程）、`build.py`、`flash_keil.ps1`、接线总表 |
 | `10_屏幕图片/` | TJC 屏工具：`screen_show.py` 等脚本、图片 ID 对照表、屏内资源 |
-| `11_ESP无线/` | ESP32-C3/C6 无线方案（固件、说明） |
-| `12_视觉/` | **视觉链路**：`vision/`（识别+抓取主脚本）、`omv/`（K210 端）、拍照/REPL 工具 |
+| `11_ESP无线调试/` | ESP32-C3/C6 无线方案（固件、说明） |
+| `08_视觉/` | **视觉链路**：`vision/`（识别+抓取主脚本）、`omv/`（K210 端）、拍照/REPL 工具 |
 | `hw_bridge/` | **PC↔STM32 桥接**：`server.py`、`tools/`（手动控制/抓放脚本）、`protocol.md` |
 | `工创赛物料/` | 21 种物料实物照片 |
 | `Claude接续日志.md` | 全程接续开发日志（每日进展、踩坑记录） |
@@ -89,13 +87,13 @@ python hw_bridge/tools/go_safe.py
 python hw_bridge/tools/manual_pick.py
 
 # 3) 视觉引导抓取单件（拍照 → 识别 → mm 坐标 → 抓取 → 放置）
-python 12_视觉/vision/vision_pick.py --color yellow --speed 5000 --zsettle 6.0 --zlift 5.0 --gsettle 0.35 --zdn 611 --drop
+python 08_视觉/vision/vision_pick.py --color yellow --speed 5000 --zsettle 6.0 --zlift 5.0 --gsettle 0.35 --zdn 611 --drop
 
 # 4) 连续抓取某颜色全部物料（第 1 件放 (0,0)，之后每件 -70 mm 排开）
-python 12_视觉/vision/vision_pick_all.py --color green
+python 08_视觉/vision/vision_pick_all.py --color green
 
 # 5) 两点标定（视觉像素 → 龙门 mm）
-python 12_视觉/vision/calibrate_2point.py --dist -40
+python 08_视觉/vision/calibrate_2point.py --dist -40
 ```
 
 固件：`09_固件/build.py` 编译、`09_固件/flash_keil.ps1` 烧录；协议见 [`hw_bridge/protocol.md`](hw_bridge/protocol.md)。
@@ -121,7 +119,6 @@ python 12_视觉/vision/calibrate_2point.py --dist -40
 
 | 文档 | 路径 |
 |---|---|
-| 接续开发日志 | [`Claude接续日志.md`](Claude接续日志.md) |
 | 规则要点 | [`01_规则与命题/II-2规则要点与搬运赛道对照.md`](01_规则与命题/II-2规则要点与搬运赛道对照.md) |
 | 物料图鉴与识别标定 | [`01_规则与命题/物料图鉴与识别标定.md`](01_规则与命题/物料图鉴与识别标定.md) |
 | 接线总表（C8T6） | [`09_固件/接线总表-C8T6-20261004.md`](09_固件/接线总表-C8T6-20261004.md) |
