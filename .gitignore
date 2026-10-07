@@ -1,0 +1,9 @@
+# Python 缓存
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# 系统垃圾
+Thumbs.db
+desktop.ini
+~$*

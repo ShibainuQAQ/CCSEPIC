@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>工创赛"智能分拣"赛项 · 制作思路</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    line-height: 1.8; color: #2c3e50; background: #f5f7fa;
+    padding: 16px; max-width: 760px; margin: 0 auto;
+  }
+  .card {
+    background: #fff; border-radius: 12px; padding: 20px;
+    margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,.06);
+  }
+  h1 { font-size: 1.35rem; color: #1a5276; text-align: center; margin-bottom: 8px; }
+  .subtitle { text-align: center; color: #7f8c8d; font-size: .85rem; }
+  h2 {
+    font-size: 1.1rem; color: #1a5276; border-left: 4px solid #3498db;
+    padding-left: 10px; margin-bottom: 12px;
+  }
+  h3 { font-size: .95rem; color: #1a5276; margin: 12px 0 6px; }
+  p { margin-bottom: 10px; font-size: .95rem; }
+  ul, ol { padding-left: 22px; margin-bottom: 10px; font-size: .95rem; }
+  li { margin-bottom: 6px; }
+  .warn { background: #fdf3e7; border-left: 4px solid #e67e22; padding: 10px 14px; border-radius: 8px; font-size: .9rem; }
+  .danger { background: #fdedec; border-left: 4px solid #e74c3c; padding: 10px 14px; border-radius: 8px; font-size: .9rem; }
+  .tip { background: #eafaf1; border-left: 4px solid #27ae60; padding: 10px 14px; border-radius: 8px; font-size: .9rem; }
+  table { width: 100%; border-collapse: collapse; font-size: .85rem; margin-bottom: 10px; }
+  th, td { border: 1px solid #dfe6e9; padding: 8px 10px; text-align: left; }
+  th { background: #eaf2f8; color: #1a5276; }
+  tr:nth-child(even) { background: #f8fbfd; }
+  .flow {
+    background: #2c3e50; color: #aef; border-radius: 8px; padding: 14px;
+    font-size: .85rem; line-height: 2; overflow-x: auto; white-space: pre-wrap;
+  }
+  code {
+    background: #eef3f7; color: #c0392b; padding: 1px 5px;
+    border-radius: 4px; font-size: .9em;
+  }
+  .step { border-left: 3px solid #3498db; padding-left: 12px; margin-bottom: 14px; }
+  .step b { color: #1a5276; }
+  .milestone { color: #27ae60; font-size: .85rem; }
+  a { color: #2980b9; word-break: break-all; }
+  .footer { text-align: center; color: #95a5a6; font-size: .8rem; padding: 8px; }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <h1>工创赛"智能分拣"赛项 · 制作思路</h1>
+  <p class="subtitle">四川省赛 · 新手队伍 · 队内讨论版</p>
+  <br>
+  <div class="tip">
+    ✅ 已按官方规则核对：同文件夹内《2026年…项目II-2：智能分拣项目命题和比赛规则.pdf》（2026 年 7 月发布，共 8 页）。
+  </div>
+  <br>
+  <div class="warn">
+    ⚠️ <b>2026-09-15 已换赛道：智能搬运（II-1）→ 智能分拣（II-2），报名已确认。</b>本文已按 II-2 重写。校选阶段一般只要求<b>方案说明书 + 三维建模</b>，正式细则以本校教务处/学院通知为准。
+  </div>
+</div>
+
+<div class="card">
+  <h2>一、我们要做一台什么装置？</h2>
+  <p><b>不是车，是一台静态智能分拣机</b>——放在 500×500mm 场地里不动，整体 ≤ 350×350×450mm，由三部分组成：</p>
+  <table>
+    <tr><th>部分</th><th>要求</th></tr>
+    <tr><td><b>托盘</b></td><td>≥160×160mm、边缘高 ≥10mm；裁判把货物<b>随机</b>倒进托盘</td></tr>
+    <tr><td><b>分拣机构</b></td><td>我们的方案：<b>龙门 XYZ 机械手 + 舵机夹爪</b>（见第五节）</td></tr>
+    <tr><td><b>储物盒 ×6</b></td><td>各自独立；同形+同色进同一盒，每盒最多装 4 个</td></tr>
+  </table>
+  <p>按一个按钮后自己完成：</p>
+  <div class="flow">俯视摄像头识别托盘里的货物（颜色+形状+文字/二维码）
+→ 机械手逐个抓取（一次只能抓 1 个）
+→ 放进对应的储物盒（同形同色归一盒）
+→ 每放好 1 个，彩色屏先显示「序号/货物名称/图片/分拣成功总数」
+→ 显示完了才能抓下一个
+→ 直到 12 件以上货物全部分完</div>
+  <br>
+  <div class="danger">
+    ⚠️ 三个最容易记错的点：<br>
+    1. <b>逐件分拣</b>：一次只能抓 1 个，<b>屏幕没显示本次信息就抓下一个 = 不得分</b>。<br>
+    2. <b>掉货即终局</b>：货物掉在装置内或装置外 → <b>本轮直接结束</b>。<br>
+    3. <b>混盒不得分</b>：不同颜色或不同形状进同一个盒（哪怕只进一半）= 分拣错误。
+  </div>
+  <br>
+  <div class="tip">
+    💰 <b>得分大头是"归堆归得对"</b>：同形同色多个货物放同一盒，<b>每个 5 分</b>；一盒只有 1 个只得 2 分；显示信息全对每条再得 2 分。
+  </div>
+</div>
+
+<div class="card">
+  <h2>二、红线规则（踩了直接没成绩，先背下来）</h2>
+  <ul>
+    <li><b>尺寸</b>：整体（含组合式三部分）≤ <b>350×350×450mm</b>；场地占用 500×500mm</li>
+    <li><b>托盘</b>：≥160×160mm、边缘 ≥10mm（防货物滑落）</li>
+    <li><b>储物盒</b>：<b>正好 6 个</b>、各自独立，每盒保证最多 4 个货物<b>完全</b>装入</li>
+    <li><b>电源</b>：只能用 <b>1 个装在装置内部</b>的电源，种类不限，<b>赛中（含调试）绝对不能换</b>。规则<b>没有电压上限</b></li>
+    <li><b>一键启动</b>：裁判令下后一键启动；启动后<b>再碰装置或笔记本 → 本轮结束</b></li>
+    <li><b>全自主</b>：不能遥控（用遥控直接不得参赛）。<b>允许与笔记本通讯</b>，运行中不能碰</li>
+    <li><b>15 秒规则</b>：15 秒没有任何动作<b>或没有显示本次分拣信息</b> → 本轮结束</li>
+    <li><b>一次一件</b>：只能分拣托盘中的货物，一次只能 1 件</li>
+    <li>非标件必须自己设计制造，<b>禁止成品套件拼装</b>；赛中（含调试）不能更换零部件</li>
+    <li><b>显示屏</b>：高亮彩屏、仅显示功能、<b>能播各种格式图片</b>（单色 OLED 不满足！）</li>
+    <li>文档匿名：<b>别写校名、姓名、队名、特殊标记</b>，出现即任务命题文档 <b>0 分</b></li>
+  </ul>
+</div>
+
+<div class="card">
+  <h2>三、货物与识别任务（先摸清要对付什么）</h2>
+  <table>
+    <tr><th>项目</th><th>参数</th></tr>
+    <tr><td>货物尺寸</td><td><b>≤40mm 正方形范围内</b>（含薄壁件）——比想象的还小</td></tr>
+    <tr><td>货物种类</td><td>常见几何体 × 常见颜色；初赛 <b>≥12 件、≥6 种</b></td></tr>
+    <tr><td>货物上的信息</td><td><b>模拟污渍和缺陷的图形、文字、二维码</b>——识别要在有干扰下工作</td></tr>
+    <tr><td>归类规则</td><td><b>形状相同且颜色相同</b> → 同一个储物盒</td></tr>
+    <tr><td>放置方式</td><td>裁判随机倒入托盘，<b>位置和方向随机</b>，队员不许碰</td></tr>
+  </table>
+  <div class="warn">⚠️ 识别系统要同时搞定：<b>颜色分类 + 形状分类 + 抗污渍干扰 + 文字/二维码</b>（规则鼓励用 AI）。</div>
+</div>
+
+<div class="card">
+  <h2>四、比赛流程与计分（初赛）</h2>
+  <p><b>流程</b>：领队会抽签 → 检录 → 抽场地号 → <b>调试 3 分钟</b>（剩 30 秒停止调试、开电源待机，同时裁判抽签定货物并随机倒入托盘）→ 裁判令下<b>一键启动</b> → <b>运行 3 分钟</b>逐件分拣 → 每队 <b>2 次运行机会取最好</b>。</p>
+  <h3>现场初赛计分（A3，70 分）</h3>
+  <table>
+    <tr><th>情况</th><th>得分</th></tr>
+    <tr><td>储物盒里只有 1 个货物</td><td>2 分</td></tr>
+    <tr><td>同形同色多个货物同盒</td><td><b>每个 5 分</b>（必须全部入盒才算）</td></tr>
+    <tr><td>不同颜色/形状混进同盒（部分进入也算）</td><td><b>不得分</b></td></tr>
+    <tr><td>显示信息（序号/名称/图片/总数）每条全对</td><td>每条 2 分，有错不得分</td></tr>
+    <tr><td>没显示信息就分下一件</td><td>不得分</td></tr>
+    <tr><td>货物掉落（装置内外都算）</td><td><b>本轮结束</b></td></tr>
+  </table>
+  <div class="tip">💡 <b>策略推论</b>：尽量把同种货物归拢到同一个盒（5 分/件 vs 2 分/件，差 2.5 倍）；显示信息是白送的分，别因程序 bug 丢掉。</div>
+</div>
+
+<div class="card">
+  <h2>五、推荐方案（预算约 1600~2200 元，明细见《采购清单.md》）</h2>
+  <p><b>分拣机构 2026-09-15 已拍板：方案 B「龙门 XYZ + 舵机夹爪」</b>。为什么是它：</p>
+  <table>
+    <tr><th>候选</th><th>为什么不是它</th></tr>
+    <tr><td>舵机关节臂</td><td>国特队血泪教训：多舵机臂末端重复定位精度差；货物只有 40mm、掉落直接判负，赌不起</td></tr>
+    <tr><td>SCARA 转塔臂</td><td>要解运动学、关节间隙吃精度，调试链长</td></tr>
+    <tr><td>吹气/拨杆分度盘</td><td>货物随机姿态落盘不可控，"掉落=本轮结束"直接否决</td></tr>
+    <tr><td><b>龙门 XYZ</b> ✅</td><td>步进精度高、相机俯视坐标与机构坐标<b>一一对应</b>（标定简单）、结构成熟、新手成功率最高</td></tr>
+  </table>
+  <table>
+    <tr><th>模块</th><th>选型</th><th>为什么选它</th></tr>
+    <tr><td>主控</td><td><b>STM32F103RCT6</b></td><td>资料最多；2 路步进脉冲 + 2 路舵机 PWM + 串口屏 + 6 路入盒检测，资源够用</td></tr>
+    <tr><td>视觉</td><td><b>1080P 广角 USB 摄像头（可锁手动曝光）俯视托盘 + 笔记本跑 OpenCV</b></td><td>规则鼓励 AI、允许与笔记本通讯；形状+颜色+二维码+文字识别对笔记本是轻活。⚠️ 硬指标<b>能锁手动曝光</b>。识别结果串口下发 STM32</td></tr>
+    <tr><td>X/Y 轴</td><td><b>张大头 Emm42 闭环步进（脉冲版）×2 + 同步带 + 光轴导轨</b></td><td>闭环步进不丢步；同步带精度高于齿轮齿条（国特队教训）；⚠️ 选<b>脉冲版</b>别买 CAN 版</td></tr>
+    <tr><td>Z 轴+夹爪</td><td><b>DS3225 舵机 ×2（Z 升降平行四边形连杆 + 夹爪）+ 微动开关到位检测</b></td><td>Z 只需"高位/低位"两端点，舵机+连杆够，不上丝杆；<b>必须限位开关到位检测，不许只用延时</b></td></tr>
+    <tr><td>入盒检测</td><td><b>反射光电开关 ×6（每盒 1 路）</b></td><td>"货物全部入盒才计分"是硬规则，必须硬件确认，不开环盲信</td></tr>
+    <tr><td>显示</td><td><b>淘晶驰 3.5 寸串口屏（480×320）</b></td><td>高亮彩屏+播图片：货物图片预存屏内，串口发指令切换。⚠️ 别买成裸 TFT</td></tr>
+    <tr><td>电源</td><td><b>单包 6S 锂电 2200~3000mAh + 双路 DC-DC（XL4015 舵机 7.4V + LM2596 主控 5V）+ 6S 平衡充电器</b></td><td>没有行走电机，容量降半；24V 是步进驱动器推荐电压；<b>舵机和主控分开供电</b></td></tr>
+  </table>
+  <div class="warn">🛒 杂项别漏：一键启动按钮 + 急停开关、CH340 USB 转 TTL、总开关 + 保险丝 + 6S 低压报警器、TRVV 拖链电缆（龙门运动走线反复弯折，国特队灰排线磨破烧 Jetson 的教训）、环形 LED 补光灯。</div>
+  <br>
+  <div class="tip"><b>架构一句话</b>：USB 摄像头 + 笔记本负责"看"（识别+定位，结果串口下发），STM32 负责"动"（X/Y 步进、Z 舵机、夹爪、状态机）+ 串口屏显示 + 入盒检测确认。</div>
+</div>
+
+<div class="card">
+  <h2>六、四步走路线（大二课业重，按周利用课余时间）</h2>
+  <div class="step">
+    <b>第 1 步：让机构动起来（2~3 周）</b><br>
+    学 STM32 基础 → 步进驱动器接线（脉冲+方向）→ 定时器发脉冲+加减速 → X/Y 回原点（微动开关）→ 按坐标走位 → 舵机 Z 升降+夹爪开合+到位检测。<br>
+    <span class="milestone">✅ 里程碑：串口发"(x,y)"坐标，机械手能走过去抓起一个小方块放回原点。</span>
+  </div>
+  <div class="step">
+    <b>第 2 步：让装置看得见（2~3 周）</b><br>
+    笔记本 OpenCV：俯视图像 → 颜色分割+形状分类（先规则法：轮廓/顶点数/圆度；再上 AI）→ 输出"种类+中心坐标+角度" → 九点标定映射到托盘坐标 → 串口发 STM32。<br>
+    ⚠️ 货物上有模拟污渍/文字/二维码干扰，<b>颜色形状识别要做抗干扰</b>（去噪、面积限幅、多次确认）。<br>
+    <span class="milestone">✅ 里程碑：托盘里放 6 种货物，屏幕打印出每种的名字和坐标，10 次对 9 次。</span>
+  </div>
+  <div class="step">
+    <b>第 3 步：串起单件分拣全流程（2~3 周）</b><br>
+    识别 → 规划分拣顺序 → 抓取 → 入盒（光电确认）→ 串口屏逐件显示 → 再抓下一件。做"显示→下一件"的严格时序。<br>
+    <span class="milestone">✅ 里程碑：6 件货物连续分拣，成功率 10 轮里 8 轮全对。</span>
+  </div>
+  <div class="step">
+    <b>第 4 步：磨稳定性 + 提速（4 周以上）</b><br>
+    12+ 件压测、异常处理（抓空/卡货/识别存疑重拍）、3 分钟时间预算分配、外壳美观（A2 创意分 10 分看外形+内部结构）。<br>
+    ⚠️ <b>15 秒无动作或无显示就判负</b>——每个动作加超时重试，宁可放弃一件也不能卡死整轮。<br>
+    <span class="milestone">✅ 里程碑：连续跑 10 轮不死机，12 件 3 分钟内分完。</span>
+  </div>
+</div>
+
+<div class="card">
+  <h2>七、新手最容易踩的 5 个坑</h2>
+  <ol>
+    <li><b>舵机和单片机共电源</b> → 舵机一使劲单片机就重启，灵异 bug 之源，分开供电</li>
+    <li><b>识别不做抗干扰</b> → 实验室调好阈值就不管，赛场光线不一样全崩；调试那 3 分钟就是干这个的</li>
+    <li><b>只用延时不做到位检测</b> → 改一次动作链全乱；夹爪/Z 轴都用微动开关确认</li>
+    <li><b>先抓下一件再显示</b> → 规则明文：信息没显示就分下一件不得分；"显示完成"必须是硬门禁</li>
+    <li><b>一个环节卡死就死等</b> → 15 秒无动作本轮结束；每个动作加超时，识别存疑宁可重拍也不硬抓</li>
+  </ol>
+</div>
+
+<div class="card">
+  <h2>八、成绩怎么算（别把力气用错地方）</h2>
+  <table>
+    <tr><th>环节</th><th>项目</th><th>分数</th><th>怎么评</th></tr>
+    <tr><td>初赛</td><td>任务命题文档 A1</td><td>20</td><td><b>扣分制</b>：内容质量 15 + 排版规范 5；雷同/出现校名姓名 → <b>0 分</b></td></tr>
+    <tr><td>初赛</td><td>作品创意设计 A2</td><td>10</td><td>专家现场打分取平均：创新性 4 + 美观性 3 + 合理性 3；<b>同校外形雷同全 0</b></td></tr>
+    <tr><td>初赛</td><td>现场初赛 A3</td><td>70</td><td>入盒计件（第四节表）</td></tr>
+    <tr><td>决赛</td><td>创新实践 B1</td><td>30</td><td>4 小时现场命题任务（用现场设备材料）；名次换算</td></tr>
+    <tr><td>决赛</td><td>现场决赛 B2</td><td>70</td><td>流程同初赛；名次换算 <code>70 − 28/(N−1)×(名次−1)</code></td></tr>
+  </table>
+  <div class="warn">⚠️ <b>A1 文档是扣分制不是名次保底制</b>——写好"决赛任务命题方案"（货物总数/种类/分拣时间/分拣要求）就能接近满分。<b>文档是性价比最高的 20 分，值得认真写。</b></div>
+  <br>
+  <p><b>报到要交</b>：任务命题文档一份（即"决赛任务命题方案"）。是否还要视频等材料，以学校/组委会后续通知为准。</p>
+  <div class="danger">⚠️ 决赛"创新实践"是 4 小时现场命题任务（现场提供设备材料）→ 夹爪等执行件做成<b>可快速更换模块</b> + 带足备件和工具。<br>⚠️ <b>同校作品外形雷同，全部给 0 分。</b></div>
+</div>
+
+<div class="card">
+  <h2>九、分工建议（3~4 人队）</h2>
+  <ul>
+    <li><b>1 人机械</b>：三维建模 + 3D 打印（龙门架/连杆/夹爪/储物盒/托盘）+ 装配（校选阶段任务最重）</li>
+    <li><b>1 人电控</b>：STM32、步进脉冲控制、舵机、入盒检测、串口屏</li>
+    <li><b>1 人视觉</b>：笔记本 OpenCV 识别（颜色/形状/抗干扰/二维码）+ 九点标定 + 串口协议</li>
+    <li><b>队长</b>：统筹 + 状态机整合 + 文档（<b>A1 文档 20 分扣分制</b>，性价比最高，别轻视）</li>
+  </ul>
+</div>
+
+<div class="card">
+  <h2>十、入门学习清单（按顺序学，边学边做）</h2>
+  <ol>
+    <li><b>C 语言 + STM32 入门</b>：B 站"江协科技 STM32 入门教程"（免费，新手口碑最好）</li>
+    <li><b>步进电机控制</b>：脉冲 + 方向的原理、梯形/S 曲线加减速、回原点</li>
+    <li><b>OpenCV（Python）</b>：HSV 颜色分割、轮廓与形状特征（顶点数/圆度/Hu 矩）、<code>QRCodeDetector</code> 读二维码、相机标定与坐标映射</li>
+    <li><b>三维建模</b>：SolidWorks 或 Fusion 360（校选要交三维模型，3D 打印件也用得上）</li>
+    <li><b>串口通信</b>：STM32 和笔记本各会发会收，定个简单协议（如 <code>$类型,x,y,角度#</code>）；淘晶驰串口屏上位机编辑器用法</li>
+  </ol>
+</div>
+
+<div class="card">
+  <h2>十一、参考资料</h2>
+  <h3>官方规则（最优先）</h3>
+  <ul>
+    <li>同文件夹内《2026年…项目II-2：智能分拣项目命题和比赛规则.pdf》</li>
+    <li>同文件夹《II-2规则要点与搬运赛道对照.md》——规则要点 + 硬件沿用性评审 + 机构方案对比</li>
+  </ul>
+  <h3>四川赛区通知</h3>
+  <ul>
+    <li><a href="https://sieetc.swjtu.edu.cn/info/1073/11321.htm">西南交通大学 2026 校选报名通知</a></li>
+    <li><a href="https://sma.xhu.edu.cn/b1/b3/c669a242099/page.htm">西华大学 2026 校选通知</a></li>
+    <li><a href="https://jwc.scu.edu.cn/info/1069/9339.htm">四川大学校内选拔通知</a></li>
+    <li>大赛官网：<a href="http://www.gcxl.edu.cn">http://www.gcxl.edu.cn</a></li>
+  </ul>
+  <h3>技术参考</h3>
+  <ul>
+    <li><b>同文件夹 <code>开源\</code> 目录</b>：西安理工大学 2025 国特等奖开源方案（4 篇整理稿）。⚠️ 那是<b>搬运赛道</b>的移动机器人方案——底盘/巡线用不上，但<b>串口通信架构、闭环步进经验、同步带 vs 齿轮齿条教训、拖链电缆教训、模块化快拆理念</b>仍然通用</li>
+    <li>OpenCV 官方文档、淘晶驰串口屏开发资料（官网有上位机和指令集）</li>
+  </ul>
+  <div class="warn">⚠️ 开源方案许可为 <b>CC BY-NC-SA</b>：禁止商用倒卖，<b>禁止抄进我们的方案说明书</b>（比赛要求文档匿名、不抄模板），引用需署名。</div>
+</div>
+
+<p class="footer">工创赛智能分拣 · 队内讨论版 · 2026-09-15 按 II-2 规则重写</p>
+
+</body>
+</html>

@@ -1,0 +1,27 @@
+; M1 固件 —— armlink 分散加载（scatter）描述文件
+;
+; 为什么要有它：告诉链接器"flash 和 RAM 各在哪、谁放哪一段"。
+; 向量表必须落在 flash 最开头（硬件规定），所以用 *(RESET, +First) 钉死。
+;
+; ⚠️ 2026-10-04：**目标芯片从 STM32F103RCT6 换成 STM32F103C8T6**（原板因接线短路烧了 ✗）
+;    · RCT6：256KB flash @0x08000000，48KB SRAM @0x20000000
+;    · **C8T6：64KB flash，20KB SRAM** ← 现在按这个配
+;    换回 RCT6 时：ER_IROM1 改 0x00040000、RW_IRAM1 改 0x0000C000，并把 startup.c 的
+;    STACK_TOP 改回 0x2000C000。
+
+LR_IROM1 0x08000000 0x00010000  {          ; 加载区：**64KB flash**（C8T6）
+  ER_IROM1 0x08000000 0x00010000  {        ; 执行区（与加载区同址，无需搬运）
+    *(RESET, +First)                       ; ← 启动文件里的向量表，必须第一
+    *(InRoot$$Sections)                    ; C 库的根段（__main 依赖）
+    .ANY (+RO)                             ; 其余只读内容（代码、常量）
+  }
+  RW_IRAM1 0x20000000 0x00003800  {        ; **14KB**：可读写数据 + 零初始化数据
+    .ANY (+RW +ZI)
+  }
+}
+
+; ⚠️ 20KB SRAM 的划分：RW/ZI 14KB + **栈 6KB**（0x20003800~0x20005000）。
+;    栈顶在 startup.c 里写死为 **0x20005000**（向下增长）。
+;    为什么 RW/ZI 只给 14KB：当前 RW+ZI 才用 1.5KB 左右 ✓，剩下的都给栈更安全 ——
+;    2026-10-03 就因为栈只有 2KB 出过 HardFault（CFSR=INVSTATE，返回地址被踩 ✗），
+;    教训是"RAM 再紧，栈也要给足"。

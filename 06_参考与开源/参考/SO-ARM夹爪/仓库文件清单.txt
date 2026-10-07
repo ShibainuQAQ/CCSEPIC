@@ -1,0 +1,158 @@
+﻿     2841  .github/workflows/ci.yaml
+       69  .gitignore
+     1742  .pre-commit-config.yaml
+     4114  CLAUDE.md
+     4463  CONTRIBUTING.md
+    18657  DOCS-LICENSE.txt
+     8852  HARDWARE-LICENSE.txt
+    11358  LICENSES/Apache-2.0.txt
+    18657  LICENSES/CC-BY-4.0.txt
+     8852  LICENSES/CERN-OHL-P-2.0.txt
+     5392  LICENSING.md
+     3637  NOTICE
+    12738  README.md
+     6359  RELICENSING.md
+     7767  REUSE.toml
+    11358  SOFTWARE-LICENSE.txt
+    92681  assets/images/SO ARM 101 Parallel Gripper Live.jpg
+   148022  assets/images/assembly/02-servo-with-gear-assembly.png
+   117213  assets/images/assembly/09-gripper-holder-attachment.png
+   234940  assets/images/assembly/Feetech-Servo-Window.png
+   207478  assets/images/assembly/camera-attachment.png
+    75543  assets/images/assembly/clamp+rack+nail.PNG
+    76989  assets/images/assembly/clamp+rack.png
+   132132  assets/images/assembly/frame+bearings.png
+   167906  assets/images/assembly/frame-with-clamps.png
+   250188  assets/images/assembly/max-torque-window.png
+    39609  assets/images/assembly/rod-test-plate.PNG
+   126136  assets/images/assembly/rods+clamps.PNG
+   204629  assets/images/assembly/servo-on-frame.png
+   139145  assets/images/simulation/gazebo/gazebo_pick_place.png
+   134316  assets/images/simulation/mujoco/mujoco_pick_place.png
+   165260  assets/images/specification/03-mounting-interface.jpg
+   147829  assets/images/specification/07-gripper-on-so-arm100.jpg
+   139686  assets/images/specification/08-gripper-dimensions-3d.png
+   443971  assets/images/specification/09-camera-types.png
+     4579  community/histology-slide-gripper/README.md
+    45324  community/histology-slide-gripper/assets/arducam-holder-front.jpg
+ 25652874  community/histology-slide-gripper/assets/histology-slide-gripper-demo.gif
+    75131  community/histology-slide-gripper/assets/parallel-microscope-gripper-front.png
+   196249  community/histology-slide-gripper/assets/parallel-microscope-gripper-isometric.png
+   100141  community/histology-slide-gripper/assets/parallel-microscope-gripper-side.png
+    53224  community/histology-slide-gripper/assets/slide-gripper-single-slide.jpg
+    63992  community/histology-slide-gripper/assets/slide-gripper-staining-dipper.jpg
+  2976973  community/histology-slide-gripper/cad/the-parallel-microscope-slide-gripper.step
+  2521584  community/histology-slide-gripper/cad/the-parallel-microscope-slide-gripper.stl
+       59  community/histology-slide-gripper/mujoco/.gitignore
+     7228  community/histology-slide-gripper/mujoco/README.md
+     1777  community/histology-slide-gripper/mujoco/build_arm.py
+     4704  community/histology-slide-gripper/mujoco/build_full.py
+      900  community/histology-slide-gripper/mujoco/gripper_actuation.xml
+      844  community/histology-slide-gripper/mujoco/gripper_assets.xml
+     2992  community/histology-slide-gripper/mujoco/gripper_body.xml
+  1456384  community/histology-slide-gripper/mujoco/meshes/arm/base_link.stl
+   440484  community/histology-slide-gripper/mujoco/meshes/arm/clamp_1.stl
+   440484  community/histology-slide-gripper/mujoco/meshes/arm/clamp_2.stl
+  1669384  community/histology-slide-gripper/mujoco/meshes/arm/link1_1.stl
+  1437284  community/histology-slide-gripper/mujoco/meshes/arm/link2_1.stl
+  1857784  community/histology-slide-gripper/mujoco/meshes/arm/link3_1.stl
+  2032084  community/histology-slide-gripper/mujoco/meshes/arm/link4_1.stl
+  2239584  community/histology-slide-gripper/mujoco/meshes/arm/link5_1.stl
+  1271184  community/histology-slide-gripper/mujoco/meshes/base.stl
+    69584  community/histology-slide-gripper/mujoco/meshes/jaw_left.stl
+    69584  community/histology-slide-gripper/mujoco/meshes/jaw_right.stl
+   287884  community/histology-slide-gripper/mujoco/meshes/pinion.stl
+   183219  community/histology-slide-gripper/mujoco/mujoco_simulation_preview.png
+      990  community/histology-slide-gripper/mujoco/render_arm.py
+     1504  community/histology-slide-gripper/mujoco/render_link5.py
+       40  community/histology-slide-gripper/mujoco/requirements.txt
+     1876  community/histology-slide-gripper/mujoco/scene_gripper.xml
+     4963  community/histology-slide-gripper/mujoco/so101_slide_gripper.xml
+    11242  community/histology-slide-gripper/mujoco/so_101.urdf.xacro
+     7037  community/histology-slide-gripper/mujoco/so_101_arm.urdf
+     3332  community/histology-slide-gripper/mujoco/so_101_arm.xml
+     1579  community/histology-slide-gripper/mujoco/test_grasp.py
+      566  community/histology-slide-gripper/mujoco/view.py
+   660315  docs/Assembly Guide Follower Gripper.pdf
+   674475  docs/Assembly Guide SO-ARM101.pdf
+   167026  docs/Parallel gripper by Robo9.pdf
+   310453  docs/SO-ARM101 by Robo9.pdf
+     5099  docs/assembly-guide.md
+     4018  docs/bom.md
+     4922  docs/quick-start.md
+     4336  docs/specifications.md
+     2456  examples/README.md
+     2762  examples/basic_usage.py
+   534184  models/Follower gripper (165x165 bed size).STL
+  5731780  models/RB9.01.062.000 Gripper.STEP
+     2512  models/README.md
+   204284  models/parts/Gripper test plate star holes 6.0-6.3.STL
+   145184  models/parts/RB9.01.060.074 Camera holder.STL
+    82584  models/parts/RB9.01.060.080 Holder.STL
+    41284  models/parts/RB9.01.060.090 Camera spacer.STL
+   268084  models/parts/RB9.01.060.110 D405 holder.STL
+    90284  models/parts/RB9.01.062.010 Main frame.STL
+    37784  models/parts/RB9.01.062.020 Clamp.STL
+    73484  models/parts/RB9.01.062.021 (D6.0) Clamp.STL
+    73484  models/parts/RB9.01.062.021 (D6.1) Clamp.STL
+    73484  models/parts/RB9.01.062.021 (D6.2) Clamp.STL
+    73484  models/parts/RB9.01.062.021 (D6.3) Clamp.STL
+    22084  models/parts/RB9.01.062.030 Gear rack.STL
+    23584  models/parts/RB9.01.062.031 Gear rack.STL
+    55784  models/parts/RB9.01.062.040 Gear.STL
+     2684  models/parts/RB9.01.062.100 Nail.STL
+     5588  simulation/README.md
+     3558  simulation/coppeliasim/README.md
+     1985  simulation/gazebo/README.md
+     3274  simulation/isaac_sim/README.md
+     2545  simulation/mujoco/README.md
+      109  simulation/so_arm_101_description/.dockerignore
+     5763  simulation/so_arm_101_description/Dockerfile
+     1702  simulation/so_arm_101_description/LICENSE.md
+      904  simulation/so_arm_101_description/config/controllers.yaml
+     4768  simulation/so_arm_101_description/config/display.rviz
+     4099  simulation/so_arm_101_description/docker-compose.yaml
+      553  simulation/so_arm_101_description/docker/constrain-window.sh
+     1310  simulation/so_arm_101_description/docker/entrypoint.sh
+     1283  simulation/so_arm_101_description/launch/display.launch.py
+     8611  simulation/so_arm_101_description/launch/sim.launch.py
+     2221  simulation/so_arm_101_description/meshes/LICENSE.md
+    63384  simulation/so_arm_101_description/meshes/collision/base_link.stl
+    26084  simulation/so_arm_101_description/meshes/collision/clamp_1.stl
+    25884  simulation/so_arm_101_description/meshes/collision/clamp_2.stl
+    94184  simulation/so_arm_101_description/meshes/collision/link1_1.stl
+   108484  simulation/so_arm_101_description/meshes/collision/link2_1.stl
+   153584  simulation/so_arm_101_description/meshes/collision/link3_1.stl
+   146684  simulation/so_arm_101_description/meshes/collision/link4_1.stl
+    54284  simulation/so_arm_101_description/meshes/collision/link5_1.stl
+  1456384  simulation/so_arm_101_description/meshes/visual/base_link.stl
+   440484  simulation/so_arm_101_description/meshes/visual/clamp_1.stl
+   440484  simulation/so_arm_101_description/meshes/visual/clamp_2.stl
+  1669384  simulation/so_arm_101_description/meshes/visual/link1_1.stl
+  1437284  simulation/so_arm_101_description/meshes/visual/link2_1.stl
+  1857784  simulation/so_arm_101_description/meshes/visual/link3_1.stl
+  2032084  simulation/so_arm_101_description/meshes/visual/link4_1.stl
+  2239584  simulation/so_arm_101_description/meshes/visual/link5_1.stl
+     1815  simulation/so_arm_101_description/package.xml
+        0  simulation/so_arm_101_description/resource/so_arm_101_description
+     1425  simulation/so_arm_101_description/scripts/generate_collision_meshes.py
+     4918  simulation/so_arm_101_description/scripts/publish_mujoco_description.py
+     4415  simulation/so_arm_101_description/scripts/setup_webots.py
+      665  simulation/so_arm_101_description/scripts/validate_xml.py
+      113  simulation/so_arm_101_description/setup.cfg
+     1388  simulation/so_arm_101_description/setup.py
+        0  simulation/so_arm_101_description/so_arm_101_description/__init__.py
+     4918  simulation/so_arm_101_description/so_arm_101_description/publish_mujoco_description.py
+     2231  simulation/so_arm_101_description/test/test_config.py
+     1462  simulation/so_arm_101_description/test/test_meshes.py
+     2743  simulation/so_arm_101_description/test/test_mujoco_load.py
+     4576  simulation/so_arm_101_description/test/test_urdf_structure.py
+      185  simulation/so_arm_101_description/urdf/materials.xacro
+     4110  simulation/so_arm_101_description/urdf/so_101.ros2_control.xacro
+    11242  simulation/so_arm_101_description/urdf/so_101.urdf.xacro
+     1497  simulation/so_arm_101_description/worlds/empty.sdf
+      633  simulation/so_arm_101_description/worlds/webots_world.wbt
+     2683  simulation/webots/README.md
+    13832  software/python/gripper_control.py
+      990  software/python/requirements.txt
+# 共 157 个文件，合计 66.85 MB
