@@ -1,0 +1,93 @@
+ISO-10303-21;
+HEADER;
+FILE_DESCRIPTION (( 'STEP AP203' ),
+    '1' );
+FILE_NAME ('Follower gripper (165x165 bed size).STEP',
+    '2026-09-20T14:28:10',
+    ( '' ),
+    ( '' ),
+    'SwSTEP 2.0',
+    'SolidWorks 2024',
+    '' );
+FILE_SCHEMA (( 'CONFIG_CONTROL_DESIGN' ));
+ENDSEC;
+
+DATA;
+#1 = MECHANICAL_CONTEXT ( 'NONE', #73, 'mechanical' ) ;
+#2 = DATE_AND_TIME ( #18, #24 ) ;
+#3 = CC_DESIGN_APPROVAL ( #54, ( #70 ) ) ;
+#4 = APPROVAL_STATUS ( 'not_yet_approved' ) ;
+#5 = PRODUCT_DEFINITION_FORMATION_WITH_SPECIFIED_SOURCE ( '�', '', #31, .NOT_KNOWN. ) ;
+#6 = LOCAL_TIME ( 22, 28, 10.00000000000000000, #55 ) ;
+#7 = APPROVAL_DATE_TIME ( #40, #67 ) ;
+#8 = PERSON_AND_ORGANIZATION ( #43, #15 ) ;
+#9 = DATE_TIME_ROLE ( 'creation_date' ) ;
+#10 = COORDINATED_UNIVERSAL_TIME_OFFSET ( 8, 0, .AHEAD. ) ;
+#11 = PERSON_AND_ORGANIZATION ( #43, #15 ) ;
+#12 = DATE_AND_TIME ( #61, #29 ) ;
+#13 = APPROVAL_DATE_TIME ( #34, #54 ) ;
+#14 = PRODUCT_RELATED_PRODUCT_CATEGORY ( 'detail', '', ( #31 ) ) ;
+#15 = ORGANIZATION ( '未', '未', '' ) ;
+#16 = COORDINATED_UNIVERSAL_TIME_OFFSET ( 8, 0, .AHEAD. ) ;
+#17 = PERSON_AND_ORGANIZATION_ROLE ( 'design_supplier' ) ;
+#18 = CALENDAR_DATE ( 2026, 20, 9 ) ;
+#19 = CC_DESIGN_APPROVAL ( #67, ( #5 ) ) ;
+#20 = CC_DESIGN_PERSON_AND_ORGANIZATION_ASSIGNMENT ( #26, #42, ( #70 ) ) ;
+#21 = CC_DESIGN_APPROVAL ( #53, ( #22 ) ) ;
+#22 = PRODUCT_DEFINITION ( '�', '', #5, #30 ) ;
+#23 = CC_DESIGN_PERSON_AND_ORGANIZATION_ASSIGNMENT ( #62, #74, ( #5 ) ) ;
+#24 = LOCAL_TIME ( 22, 28, 10.00000000000000000, #16 ) ;
+#25 = APPLICATION_PROTOCOL_DEFINITION ( 'international standard', 'config_control_design', 1994, #73 ) ;
+#26 = PERSON_AND_ORGANIZATION ( #43, #15 ) ;
+#27 = PERSON_AND_ORGANIZATION ( #43, #15 ) ;
+#28 = CC_DESIGN_SECURITY_CLASSIFICATION ( #70, ( #5 ) ) ;
+#29 = LOCAL_TIME ( 22, 28, 10.00000000000000000, #33 ) ;
+#30 = DESIGN_CONTEXT ( 'detailed design', #58, 'design' ) ;
+#31 = PRODUCT ( 'Follower gripper (165x165 bed size)', 'Follower gripper (165x165 bed size)', '', ( #1 ) ) ;
+#32 = SECURITY_CLASSIFICATION_LEVEL ( 'unclassified' ) ;
+#33 = COORDINATED_UNIVERSAL_TIME_OFFSET ( 8, 0, .AHEAD. ) ;
+#34 = DATE_AND_TIME ( #66, #72 ) ;
+#35 = APPROVAL_STATUS ( 'not_yet_approved' ) ;
+#36 = PERSON_AND_ORGANIZATION ( #43, #15 ) ;
+#37 = CC_DESIGN_DATE_AND_TIME_ASSIGNMENT ( #12, #9, ( #22 ) ) ;
+#38 = PERSON_AND_ORGANIZATION_ROLE ( 'design_owner' ) ;
+#39 = PERSON_AND_ORGANIZATION ( #43, #15 ) ;
+#40 = DATE_AND_TIME ( #60, #6 ) ;
+#41 = DATE_AND_TIME ( #63, #59 ) ;
+#42 = PERSON_AND_ORGANIZATION_ROLE ( 'classification_officer' ) ;
+#43 = PERSON ( '未', '未', '未', ('未'), ('未'), ('未') ) ;
+#44 = APPROVAL_PERSON_ORGANIZATION ( #8, #67, #56 ) ;
+#45 = APPLICATION_PROTOCOL_DEFINITION ( 'international standard', 'config_control_design', 1994, #58 ) ;
+#46 = PERSON_AND_ORGANIZATION ( #43, #15 ) ;
+#47 = CC_DESIGN_DATE_AND_TIME_ASSIGNMENT ( #2, #75, ( #70 ) ) ;
+#48 = PRODUCT_DEFINITION_SHAPE ( 'NONE', 'NONE',  #22 ) ;
+#49 = APPROVAL_ROLE ( '' ) ;
+#50 = APPROVAL_PERSON_ORGANIZATION ( #36, #54, #69 ) ;
+#51 = COORDINATED_UNIVERSAL_TIME_OFFSET ( 8, 0, .AHEAD. ) ;
+#52 = APPROVAL_STATUS ( 'not_yet_approved' ) ;
+#53 = APPROVAL ( #35, '未' ) ;
+#54 = APPROVAL ( #4, '未' ) ;
+#55 = COORDINATED_UNIVERSAL_TIME_OFFSET ( 8, 0, .AHEAD. ) ;
+#56 = APPROVAL_ROLE ( '' ) ;
+#57 = CC_DESIGN_PERSON_AND_ORGANIZATION_ASSIGNMENT ( #46, #38, ( #31 ) ) ;
+#58 = APPLICATION_CONTEXT ( 'configuration controlled 3d designs of mechanical parts and assemblies' ) ;
+#59 = LOCAL_TIME ( 22, 28, 10.00000000000000000, #10 ) ;
+#60 = CALENDAR_DATE ( 2026, 20, 9 ) ;
+#61 = CALENDAR_DATE ( 2026, 20, 9 ) ;
+#62 = PERSON_AND_ORGANIZATION ( #43, #15 ) ;
+#63 = CALENDAR_DATE ( 2026, 20, 9 ) ;
+#64 = CC_DESIGN_PERSON_AND_ORGANIZATION_ASSIGNMENT ( #11, #17, ( #5 ) ) ;
+#65 = PERSON_AND_ORGANIZATION_ROLE ( 'creator' ) ;
+#66 = CALENDAR_DATE ( 2026, 20, 9 ) ;
+#67 = APPROVAL ( #52, '未' ) ;
+#68 = APPROVAL_DATE_TIME ( #41, #53 ) ;
+#69 = APPROVAL_ROLE ( '' ) ;
+#70 = SECURITY_CLASSIFICATION ( '', '', #32 ) ;
+#71 = APPROVAL_PERSON_ORGANIZATION ( #27, #53, #49 ) ;
+#72 = LOCAL_TIME ( 22, 28, 10.00000000000000000, #51 ) ;
+#73 = APPLICATION_CONTEXT ( 'configuration controlled 3d designs of mechanical parts and assemblies' ) ;
+#74 = PERSON_AND_ORGANIZATION_ROLE ( 'creator' ) ;
+#75 = DATE_TIME_ROLE ( 'classification_date' ) ;
+#76 = CC_DESIGN_PERSON_AND_ORGANIZATION_ASSIGNMENT ( #39, #65, ( #22 ) ) ;
+ENDSEC;
+END-ISO-10303-21;
