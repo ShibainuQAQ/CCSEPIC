@@ -22,6 +22,8 @@
     gz / gz2    去 Z 抬起位 / 放下位        gg / gg2  去夹爪张开位 / 夹住位
   ── 其它
     p           打印当前状态（x y 步/mm、z、夹爪、软限位）
+    M           读板子里的 EN 引脚状态 + 步进引脚配置（"某轴不动"排查第一站 ✓）
+    T           ⭐"用万用表量脉冲"专用：20Hz 连发约 20 秒（正常 4000Hz 只发 0.1 秒，表读不到 ✗）
     + / -       步长 ×2 / ÷2（Z、夹爪、X/Y 各自记）
     z           当前 X/Y 位置记为 0
     h           帮助        x 或 q   退出
@@ -204,6 +206,91 @@ def main():
             print(__doc__.split("按键", 1)[1][:1200])
             continue
         if low == "p":
+            show()
+            continue
+        if c == "M":
+            # ⭐ 2026-10-08：**"某轴完全不动"的第一站** ✓
+            #    固件里 EN 是**两轴一起**控制的（`EN 1` 同时拉低 PA4 和 PA7）✗ 没有单轴 EN 命令 ✓，
+            #    所以"只有 Y 不动"不可能是固件单禁了 Y —— 但**引脚电平到底发出去没有**要眼见为实 ✓。
+            #    直接读 GPIOA->ODR（bit4=PA4=X-EN、bit7=PA7=Y-EN；**低电平=使能**）✓
+            #    和 GPIOA->CRL（这六个脚是不是配成了推挽输出 ✓）。
+            lines, _ = lk.cmd("M3?", wait=0.9)
+            got = False
+            for l in lines:
+                if "aodr=" not in l:
+                    continue
+                got = True
+                print("    %s" % l)
+                try:
+                    odr = int(l.split("aodr=", 1)[1].split()[0])
+                except ValueError:
+                    continue
+                en_x = not ((odr >> 4) & 1)
+                en_y = not ((odr >> 7) & 1)
+                print("    EN 引脚：PA4(X)=%s   PA7(Y)=%s    （低电平 = 使能）"
+                      % ("使能" if en_x else "失能", "使能" if en_y else "失能"))
+                if not (en_x and en_y):
+                    print("    ⚠️ 有轴处于**失能**：发 `EN 1`（或退出重进）✓")
+                try:
+                    acrl = int(l.split("acrl=", 1)[1].split()[0])
+                except ValueError:
+                    continue
+                # ⭐ 2026-10-08：Y 脉冲脚已换到 **PA12**（PA5 判损）→ 期望值随之变化：
+                #    · CRL（PA0~7）：PA0/PA1/PA4/PA6/PA7 = 3（推挽输出）
+                #    · **PA5 = 4（故意留成浮空输入）** —— 旧线还挂着也不会打架 ✓
+                #    · CRH（PA8~15）：**PA12 = 3**（新的 Y 脉冲脚；CRL 里看不到它 ✗，所以固件加了 acrh）
+                want_l = {0: 3, 1: 3, 4: 3, 6: 3, 7: 3}
+                bad = ["PA%d=%X" % (i, (acrl >> (4 * i)) & 0xF)
+                       for i, w in want_l.items() if ((acrl >> (4 * i)) & 0xF) != w]
+                if bad:
+                    print("    ⚠️ 步进引脚配置不对：%s（应为 3 = 推挽输出）——**这个轴推不动** ✗"
+                          % " ".join(bad))
+                else:
+                    print("    步进引脚配置 ✓（PA0/PA1/PA4/PA6/PA7 推挽输出）")
+                pa5 = (acrl >> (4 * 5)) & 0xF
+                print("    PA5 = %X %s" % (pa5, "（已弃用、故意留成输入 ✓）" if pa5 == 4
+                                          else "⚠️ 本应留成 4（浮空输入）"))
+                if "acrh=" in l:
+                    try:
+                        acrh = int(l.split("acrh=", 1)[1].split()[0])
+                    except ValueError:
+                        continue
+                    pa12 = (acrh >> (4 * 4)) & 0xF          # PA12 在 CRH 的 bit[19:16]
+                    print("    **PA12 = %X** %s（新的 Y 脉冲脚）"
+                          % (pa12, "✓ 推挽输出" if pa12 == 3
+                             else "✗ 不是推挽输出 → Y 一步都不会走"))
+                else:
+                    print("    ⚠️ 固件没回 `acrh=`（还是旧固件 0.8.1？）→ 先发 `VER` 看是不是 **fw=0.8.2** ✗")
+            if not got:
+                print("    读不到 M3?（板子没回话？先按 p 看串口通不通 ✗）")
+            continue
+        if c == "T":
+            # ⭐ 2026-10-08：**"用万用表量脉冲"专用** ✓
+            #    ⚠️ 问题：手动台跑 SPD 4000、按一次 i/j 只走 5mm = **0.1 秒**的脉冲 ✗ ——
+            #       万用表（尤其 Hz 档）根本来不及读到任何东西 ✓。
+            #    所以这里**临时把频率压到 20 Hz、走 400 步** = **约 20 秒连续脉冲** ✓：
+            #       · Hz 档 → 稳稳读到 ≈20 Hz ✓
+            #       · DC 档 → 能看见 0V ↔ 3.3V 来回摆 ✓
+            #    量完自动把 SPD 恢复到 4000（不影响后面手动操作 ✓）。
+            #    ⚠️ 测的是 **PUL 脚**：X=PA0、Y=PA5；参考点 = GND（或驱动器上的 Com）✓
+            ax = input("    量哪个轴？(x/y，直接回车取消) ").strip().lower()
+            if ax not in ("x", "y"):
+                print("    取消 ✓")
+                continue
+            want = "PA0" if ax == "x" else "PA5"
+            drv = "X42" if ax == "x" else "Y42"
+            lk.cmd("SPD 20", wait=0.4)
+            print("    ⭐ 现在发 20Hz 脉冲、约 20 秒。请量（黑表笔 = GND/Com）：")
+            print("       · STM32 端： %s ↔ GND" % want)
+            print("       · 驱动器端： %s 的 Stp 端子 ↔ Com（**更好量、更安全** ✓）" % drv)
+            print("       期望：Hz 档读 ≈20；DC 档 0↔3.3V 摆动 ✓  读不到 = 这根线/这个脚没在发 ✗")
+            lk.cmd("STEP %s -400" % ax, wait=0.4)     # 负方向（= j/i 那一边），400 步 ≈ 5mm
+            for s in range(20, 0, -1):
+                if s % 5 == 0:
+                    print("    ... 还有 %d 秒" % s)
+                time.sleep(1.0)
+            lk.cmd("SPD 4000", wait=0.4)              # 恢复手动台的正常速度 ✓
+            print("    发完了 ✓（脉冲总数 400 步 ≈ 5mm）")
             show()
             continue
         if low == "+":

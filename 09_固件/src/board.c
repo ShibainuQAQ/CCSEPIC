@@ -571,7 +571,16 @@ void servo_set_grip(uint16_t us)
 #define ST_PUL_X (1u << 0)      /* PA0 */
 #define ST_DIR_X (1u << 1)      /* PA1 */
 #define ST_EN_X  (1u << 4)      /* PA4 */
-#define ST_PUL_Y (1u << 5)      /* PA5 */
+/* ⭐⭐ 2026-10-08：**Y 轴脉冲脚从 PA5 换到 PA12**（原 PA5 实测：`M3?` 的 acrl 判据正常、
+ *    位置照样计数、但引脚上量不到任何脉冲 → 判定为 PA5 引脚损坏 ✗，换脚是唯一出路 ✓）。
+ *    换法 = **只改下面这个数 + 重新编译**（同一口 PA 的任意脚都行：12 / 15 / …）✓。
+ *    ⚠️ 必须和实物一致：**Y42 的 `Stp` 线要焊到这个新脚上**，否则 Y 一步都不会走 ✗。
+ *    ⚠️ 选脚禁忌（本项目已占用）：PA13/PA14 = SWD ✗、PA9/PA10 = 调试串口、PA8/PA11 = 红外盒、
+ *       PA2/PA3 = 串口屏、PA0/PA1/PA4 = X 轴、PA6/PA7 = Y 的 Dir/En、PC13 = 开机闪灯。
+ *    遗留的 PA5：下面 step_init 里**故意把它留成浮空输入** ✓ —— 旧线就算还挂在 PA5 上也不会
+ *      和 PA12 打架（一个高阻输入 + 一个推挽输出，同网也能共存 ✓）。 */
+#define STEP_Y_PUL_PIN 12u
+#define ST_PUL_Y (1u << STEP_Y_PUL_PIN)     /* PA12（原 PA5 → 已弃用）*/
 #define ST_DIR_Y (1u << 6)      /* PA6 */
 #define ST_EN_Y  (1u << 7)      /* PA7 */
 
@@ -605,12 +614,26 @@ void step_init(void)
     RCC->APB2ENR |= RCC_APB2ENR_IOPAEN;
     RCC->APB1ENR |= RCC_APB1ENR_TIM4EN;
 
-    /* PA0/PA1/PA4/PA5/PA6/PA7 → 通用推挽输出 50MHz（0x3 = MODE 11 + CNF 00）
+    /* PA0/PA1/PA4/PA6/PA7 → 通用推挽输出 50MHz（0x3 = MODE 11 + CNF 00）
      * ⚠️ 2026-10-03 实测抓到的 bug：屏蔽字原来写成 `~0xFF0F00FF`，**漏掉了 PA5（bit20~23）** →
      *    PA5 保持复位值 0x4（浮空输入）→ **Y 轴 PUL 根本推不动**。
      *    正确屏蔽 = `0xFFFF00FF`：清 PA0/PA1（bit0~7）+ PA4~PA7（bit16~31），
-     *    **保留 bit8~15**（PA2/PA3 = USART2，别动！）。判据：`M3?` 的 acrl 应 = 0x33330033。 */
-    GPIOA->CRL = (GPIOA->CRL & ~0xFFFF00FFu) | 0x33330033u;
+     *    **保留 bit8~15**（PA2/PA3 = USART2，别动！）。
+     * ⭐ 2026-10-08：**PA5 不再当 Y 脉冲用**（引脚已判损）→ 这里把它的 4 位**明确写成 0x4
+     *    = 浮空输入**（高阻，旧线挂在上面对谁都没影响 ✓），所以高半字是 `0x3343` 而不是 `0x3333`：
+     *      bit[16:19]=PA4=3  bit[20:23]=**PA5=4**  bit[24:27]=PA6=3  bit[28:31]=PA7=3
+     *    判据：`M3?` 的 acrl 应 = **0x33430033**（PA5 那一位是 4 = 正常，不是错 ✗）。 */
+    GPIOA->CRL = (GPIOA->CRL & ~0xFFFF00FFu) | 0x33430033u;
+
+    /* Y 脉冲脚（可能是 CRL 里的 PA0~PA7，也可能是 CRH 里的 PA8~PA15）→ 推挽输出 50MHz。
+     * 为什么单独写：这样换脚时只改 `STEP_Y_PUL_PIN` 一个数就够了 ✓（不用再去手算掩码）。 */
+#if (STEP_Y_PUL_PIN < 8u)
+    GPIOA->CRL = (GPIOA->CRL & ~(0xFu << (4u * STEP_Y_PUL_PIN)))
+               | (0x3u << (4u * STEP_Y_PUL_PIN));
+#else
+    GPIOA->CRH = (GPIOA->CRH & ~(0xFu << (4u * (STEP_Y_PUL_PIN - 8u))))
+               | (0x3u << (4u * (STEP_Y_PUL_PIN - 8u)));
+#endif
 
     /* 上电默认：PUL **低**、DIR 低（正方向）、EN **失能**（电机自由，避免插上就乱跑）
      * ⚠️ 同一天抓到的第二个 bug：原来把 PUL/DIR 也 BSRR **置位**了（应为清零）→ aodr 里 PA0/PA1=1。

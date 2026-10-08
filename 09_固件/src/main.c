@@ -16,7 +16,7 @@
 #include "boot_marker.h"
 #include "stm32f10x.h"
 
-#define FW_VERSION "0.8.1"   /* 0.8.1：Z 端点按实测收紧（10°~170° ⇒ 630/2370µs，原 600/2400 各超 11µs） */
+#define FW_VERSION "0.8.2"   /* 0.8.2：**Y 轴脉冲脚 PA5 → PA12**（PA5 实测判损，换脚）+ `M3?` 增加 acrh */
 #define PROTO_VERSION "1"
 
 #define LINE_MAX 160u /* 行长上限；超了回 ERR 10，避免缓冲区被灌爆。
@@ -682,8 +682,11 @@ static void handle_line(char *line)
         return;
     }
     if (streq(cmd, "M3?")) {
-        /* 步进不动时的第一站：这里能看到"定时器在不在跑 / 速率 / 引脚配置" */
-        char buf[160];
+        /* 步进不动时的第一站：这里能看到"定时器在不在跑 / 速率 / 引脚配置"。
+         * ⚠️ 2026-10-08：buf 从 160 加到 224 —— 因为下面多了 `acrh=`（PA8~PA15 的配置）。
+         *    Y 脉冲换到 PA12（≥8）之后，它的配置**只在 CRH 里看得到** ✗，
+         *    所以"换脚后到底配上没有"必须靠 acrh 判 ✓。 */
+        char buf[224];
         char *q = buf;
         q = put_str(q, "isr=");
         q = put_u32(q, (uint32_t)STEP_ISR_HZ);
@@ -699,6 +702,8 @@ static void handle_line(char *line)
         q = put_u32(q, (uint32_t)GPIOA->ODR);
         q = put_str(q, " acrl=");
         q = put_u32(q, (uint32_t)GPIOA->CRL);
+        q = put_str(q, " acrh=");
+        q = put_u32(q, (uint32_t)GPIOA->CRH);
         q = put_str(q, " smm=");
         q = put_u32(q, step_smm());
         q = put_str(q, " ramp=");
