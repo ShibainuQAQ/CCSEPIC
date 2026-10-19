@@ -1,6 +1,6 @@
 # stream_to_pc.py -- run on CanMV/K210: capture frames in a loop and emit each as base64.
 #
-# Pair with PC-side 12_视觉/live_view.py, which decodes the frames and shows them in an
+# Pair with PC-side 08_视觉/live_view.py, which decodes the frames and shows them in an
 # OpenCV window -- used to focus the lens / aim the camera while watching the result.
 #
 # Pure ASCII on purpose.

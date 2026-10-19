@@ -4,8 +4,8 @@
       → 从输出里抠 `B64 …` 行拼起来 → base64 解码存成 .jpg。
 
 用法（项目根目录）：
-  D:\\python\\python.exe 12_视觉\\shot.py
-  D:\\python\\python.exe 12_视觉\\shot.py --out 12_视觉\\shots\\tray.jpg --remote /sd/_shot.py
+  D:\\python\\python.exe 08_视觉\\shot.py
+  D:\\python\\python.exe 08_视觉\\shot.py --out 08_视觉\\shots\\tray.jpg --remote /sd/_shot.py
 """
 import argparse
 import base64

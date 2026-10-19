@@ -21,7 +21,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent.parent
-sys.path.insert(0, str(ROOT / "12_视觉"))
+sys.path.insert(0, str(ROOT / "08_视觉"))
 
 try:
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -107,7 +107,7 @@ def main():
         return 1
     print("[i] K210 = %s，共 %d 条命令" % (port, len(cmds)), flush=True)
 
-    tmp = ROOT / "12_视觉" / "omv" / "_via_generated.py"
+    tmp = ROOT / "08_视觉" / "omv" / "_via_generated.py"
     tmp.write_text(code, encoding="utf-8")
 
     b = Board(port, 115200).open()

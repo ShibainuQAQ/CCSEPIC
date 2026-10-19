@@ -5,7 +5,7 @@
 拿一小块实测一下，阈值就是**量出来的**而不是猜的 ✓。
 
 用法：
-  D:\\python\\python.exe 12_视觉\\vision\\hsv_probe.py 图.jpg 150 90        # 取 5x5
+  D:\\python\\python.exe 08_视觉\\vision\\hsv_probe.py 图.jpg 150 90        # 取 5x5
   ... 150 90 12                                                          # 取 25x25
 """
 import sys

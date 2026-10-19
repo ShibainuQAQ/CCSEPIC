@@ -14,10 +14,13 @@
   · 全程只动 X，不动 Y ✓
 
 用法：
-  D:\\python\\python.exe 12_视觉\\vision\\calibrate_2point.py
-  ... --dist 40 --k210 COM5
+  D:\\python\\python.exe 08_视觉\\vision\\calibrate_2point.py
+  ... --dist -40            # 只能为负（安全位就是 +X 机械极限 ✗）
+  ... --k210 auto           # 相机口自动认（也可显式给 COM15）
 输出：
-  标定结果打印出来 ✓，并存到 12_视觉\\vision\\calib.json ✓ 供后续换算使用 ✓
+  标定结果打印出来 ✓，并存到 08_视觉\\vision\\calib.json ✓
+  ⚠️ 本脚本只算**比例 + 旋转**；换原点（喂 0,0 点）只需改
+     `vision_pick.py` 里 `CAL` 的 `anchor_px / anchor_mm` 两行 ✓
 """
 import argparse
 import json
@@ -29,21 +32,27 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent.parent
 sys.path.insert(0, str(HERE))
-sys.path.insert(0, str(ROOT / "12_视觉"))
+sys.path.insert(0, str(ROOT / "08_视觉"))
 sys.path.insert(0, str(ROOT / "hw_bridge" / "tools"))
 
 import pc_detect  # noqa: E402
+# 相机口自动认（USB 口号会变，见 vision_pick.find_k210 的注释 ✓）
+from vision_pick import find_k210  # noqa: E402
 
 try:
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 except Exception:
     pass
 
-SHOT = ROOT / "12_视觉" / "shot.py"
+SHOT = ROOT / "08_视觉" / "shot.py"
 
 
 def find_stm32():
-    """板载 CH340K 直认；否则逐个串口 8E1 发 PING，谁回 OK pong 谁是 STM32 ✓。"""
+    """自动认 STM32 的串口 ✓（每个口试 2 轮 + 放宽等待 + 打印失败原因）。
+
+    ⚠️ 2026-10-08：原版"开串口等 1.2s、发 PING 等 0.7s"太急，实测会误报"没找到 STM32" ✗
+       （板子正忙/刚被上一次开串口打断就漏过去了）。改法与 `pick_place.find_port` 一致 ✓。
+    """
     import serial
     from serial.tools import list_ports as lp
     cands, busy = [], []
@@ -51,26 +60,34 @@ def find_stm32():
         if "1A86:7522" in (p.hwid or "").upper():
             return p.device
         cands.append(p.device)
+    if not cands:
+        print("⚠️ 系统里一个串口都没有 —— USB-TTL 插了吗？")
+        return None
     for dev in cands:
-        try:
-            s = serial.Serial(dev, 115200, parity=serial.PARITY_EVEN, timeout=0.3,
-                              dsrdtr=False, rtscts=False)
+        for _round in range(2):
             try:
-                s.dtr = False
-                s.rts = False
-            except Exception:
-                pass
-            time.sleep(1.2)
-            s.reset_input_buffer()
-            s.write(b"PING\r\n")
-            time.sleep(0.7)
-            d = s.read(300)
-            s.close()
-            if b"pong" in d:
-                return dev
-        except Exception as exc:
-            if "Permission" in repr(exc) or "拒绝" in repr(exc):
-                busy.append(dev)
+                s = serial.Serial(dev, 115200, parity=serial.PARITY_EVEN, timeout=0.4,
+                                  dsrdtr=False, rtscts=False)
+                try:
+                    s.dtr = False
+                    s.rts = False
+                except Exception:
+                    pass
+                time.sleep(1.5)
+                s.reset_input_buffer()
+                s.write(b"PING\r\n")
+                time.sleep(1.0)
+                d = s.read(400) or b""
+                s.close()
+                if b"pong" in d:
+                    return dev
+                print("    %-6s 探测无应答（收到 %d 字节）" % (dev, len(d)))
+            except Exception as exc:
+                if "Permission" in repr(exc) or "拒绝" in repr(exc):
+                    busy.append(dev)
+                else:
+                    print("    %-6s 打不开：%s" % (dev, exc))
+                break
     if busy:
         print("⚠️ 串口被占用：%s（先退出其他工具 ✗）" % ", ".join(busy))
     return None
@@ -116,7 +133,8 @@ def main():
     ap.add_argument("--dist", type=float, default=-40.0,
                     help="标定用的 X 位移(mm)。⚠️ 必须 ≤0（**只能往 −X 走** ✗）")
     ap.add_argument("--speed", type=int, default=4000)
-    ap.add_argument("--k210", default="COM5")
+    ap.add_argument("--k210", default="auto",
+                    help="K210 相机串口；**auto = 自动认** ✓（口号会变，别写死 ✗）")
     a = ap.parse_args()
 
     # ⛔⛔ 2026-10-04 硬约束（用户明确告知）：**当前位置已在 +X 机械极限上** ✗
@@ -132,6 +150,13 @@ def main():
         print("[FAIL] 没找到 STM32")
         return 1
     print("[i] STM32 = %s" % port)
+    k210 = a.k210
+    if k210 == "auto":
+        k210 = find_k210()
+    if not k210:
+        print("[FAIL] 没自动认到 K210 相机口 —— 板子插了吗？也可 --k210 COM15 手动指定")
+        return 1
+    print("[i] K210 = %s" % k210)
     from step_test import Link
     lk = Link(port)
 
@@ -149,7 +174,7 @@ def main():
         lk.cmd("ZERO all", wait=0.5)
 
         print("[1/4] 拍第一张…")
-        img1 = photo(a.k210, d1)
+        img1 = photo(k210, d1)
         if img1 is None:
             print("[FAIL] 拍不到照片（K210 没连上？）")
             return 1
@@ -169,7 +194,7 @@ def main():
         time.sleep(0.5)
 
         print("[3/4] 拍第二张…")
-        img2 = photo(a.k210, d2)
+        img2 = photo(k210, d2)
         if img2 is None:
             print("[FAIL] 第二张没拍到")
             return 1

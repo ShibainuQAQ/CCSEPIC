@@ -11,7 +11,7 @@
     from board import Board
     b = Board("COM5"); b.open(); b.wait_prompt()
     print(b.cmd("print(1+1)"))
-    b.push("12_视觉/omv/shot_to_pc.py", "/sd/_shot.py")
+    b.push("08_视觉/omv/shot_to_pc.py", "/sd/_shot.py")
     print(b.cmd("exec(open('/sd/_shot.py').read())", wait=60))
     b.close()
 """

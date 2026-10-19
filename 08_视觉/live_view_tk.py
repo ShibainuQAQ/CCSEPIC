@@ -5,12 +5,12 @@
 不依赖 OpenCV 的 GUI 支持 ✓。
 
 用法（项目根目录）：
-  D:\\python\\python.exe 12_视觉\\live_view_tk.py --port COM5
+  D:\\python\\python.exe 08_视觉\\live_view_tk.py --port COM5
   （K210 = CH340(1A86:7523)；用 hw_bridge\\tools\\port_probe.py --list 查当前号）
 
 窗口里：
   · `q` / `Esc` → 退出
-  · `s`         → 存下当前帧到 12_视觉\\shots\\live-<时间>.jpg（给我看 / 存档）
+  · `s`         → 存下当前帧到 08_视觉\\shots\\live-<时间>.jpg（给我看 / 存档）
   · `r`         → 板载流跑完（400 帧）后重新开始
 
 ⚠️ 这个工具会**独占 K210 的串口**；同时别用 CanMV IDE 连它（会抢端口 ✗）。

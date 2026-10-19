@@ -4,12 +4,12 @@
 这个工具让板子连续吐帧、电脑连续显示，**边拧镜头边看效果** ✓。
 
 用法（项目根目录）：
-  D:\\python\\python.exe 12_视觉\\live_view.py --port COM5
+  D:\\python\\python.exe 08_视觉\\live_view.py --port COM5
   （K210 = CH340(1A86:7523)，用 hw_bridge\\tools\\port_probe.py --list 查）
 
 窗口里：
   · `q` 或 `Esc` 退出
-  · `s` 存下当前帧到 12_视觉\\shots\\live-<时间>.jpg（用来给我看 / 存档）
+  · `s` 存下当前帧到 08_视觉\\shots\\live-<时间>.jpg（用来给我看 / 存档）
 
 速度：QVGA + quality 60，115200 串口 ⇒ 大约 1~2 帧/秒（调焦够用 ✓）。
 想更快：把板载脚本的 QUALITY 调低（40）或 CHUNK 调大。

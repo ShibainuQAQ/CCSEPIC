@@ -10,7 +10,7 @@
 #      "EVT U4_LINE I-AM-UARTn 12345" -> same answer, without the jumper.
 #
 # PC side:
-#   D:\python\python.exe 12_视觉\shot.py --port COM10 --script 12_视觉\omv\link_test.py
+#   D:\python\python.exe 08_视觉\shot.py --port COM10 --script 08_视觉\omv\link_test.py
 #   (shot.py will complain "no B64" at the end -- ignore it, we only want the printed log)
 
 import time

@@ -32,7 +32,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent.parent
 sys.path.insert(0, str(HERE))
-# ⚠️ 2026-10-08：目录已由 `12_视觉` 改名为 **`08_视觉`** —— 这里原来还写着旧名，
+# ⚠️ 2026-10-08：目录已由 `08_视觉` 改名为 **`08_视觉`** —— 这里原来还写着旧名，
 #    于是 `shot.py` 根本找不到（拍照直接 FAIL ✗）。改名后必须同步这一行 ✓。
 sys.path.insert(0, str(ROOT / "08_视觉"))
 

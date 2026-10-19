@@ -3,7 +3,7 @@
 目的：验证"颜色 + 形状"能不能把 7 种货物分开（尤其是 **正方体 vs 正四棱锥** 这一对）。
 先把阈值放宽一点，看能不能框到东西；框不到再按实际颜色调。
 
-PC 侧：`12_视觉\\shot.py --script 12_视觉\\omv\\blob_probe.py`
+PC 侧：`08_视觉\\shot.py --script 08_视觉\\omv\\blob_probe.py`
 （保持纯 ASCII，避免板子 REPL 的多字节字符意外）
 """
 import time

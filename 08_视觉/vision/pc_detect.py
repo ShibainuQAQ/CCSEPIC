@@ -7,7 +7,7 @@
   · 拼成 `@PLAN/@PI/@PLAN END` 下发给 STM32 ✓
 
 用法：
-  D:\\python\\python.exe 12_视觉\\vision\\pc_detect.py 12_视觉\\shots\\vision_now.jpg
+  D:\\python\\python.exe 08_视觉\\vision\\pc_detect.py 08_视觉\\shots\\vision_now.jpg
   ... --annotate 输出图.png        # 画框图，方便肉眼核对 ✓
   ... --min-area 300               # 最小色块面积（像素）
 """

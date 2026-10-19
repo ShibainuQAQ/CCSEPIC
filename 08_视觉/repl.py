@@ -7,10 +7,10 @@
   ③ Ctrl-E 进粘贴模式 → 整段发代码 → Ctrl-D 执行 → 收输出
 
 用法（项目根目录）：
-  D:\\python\\python.exe 12_视觉\\repl.py --cmd "print(123)"                  # 单条
-  D:\\python\\python.exe 12_视觉\\repl.py --cmd "a=1" --cmd "print(a)"        # 一个会话连跑多条
-  D:\\python\\python.exe 12_视觉\\repl.py --file 12_视觉\\omv\\probe_caps.py --wait 8
-  D:\\python\\python.exe 12_视觉\\repl.py --out dump.bin --raw-bytes 200000   # 收原始字节存盘（收图用）
+  D:\\python\\python.exe 08_视觉\\repl.py --cmd "print(123)"                  # 单条
+  D:\\python\\python.exe 08_视觉\\repl.py --cmd "a=1" --cmd "print(a)"        # 一个会话连跑多条
+  D:\\python\\python.exe 08_视觉\\repl.py --file 08_视觉\\omv\\probe_caps.py --wait 8
+  D:\\python\\python.exe 08_视觉\\repl.py --out dump.bin --raw-bytes 200000   # 收原始字节存盘（收图用）
 """
 import argparse
 import sys
