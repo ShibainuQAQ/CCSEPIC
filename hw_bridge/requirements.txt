@@ -1,0 +1,18 @@
+# PC 上位机工具依赖
+#
+# 历史说明：最初为了"拷到别的电脑上也能直接跑"，这些库是被**原样复制**进
+# hw_bridge/vendor（pyserial）和 hw_bridge/vendor_esp（esptool 等）再入仓库的。
+# 代价是仓库里多了 ~1300 个第三方文件、而且版本升级只能手工覆盖，对想阅读源码的人
+# 很不友好。2026-10 起改为标准做法：**库不入库，用 pip 安装**。
+#
+#    pip install -r hw_bridge/requirements.txt
+#
+# 脚本里 `sys.path.insert(0, ".../vendor")` 仍然保留：本地若还留着 vendor 目录就优先
+# 用它，删掉也不影响（pip 装好的库照样能 import）。
+pyserial>=3.5
+numpy>=1.24
+opencv-python>=4.8
+
+# ---- 可选：只在调试 ESP32 / K210 的辅助脚本里需要 ----
+# esptool>=5.4        # 11_ESP无线调试/ 里的烧录脚本
+# mpremote>=1.29      # 08_视觉/ 里操作 K210 文件系统的辅助脚本

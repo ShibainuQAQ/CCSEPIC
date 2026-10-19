@@ -12,3 +12,22 @@ desktop.ini
 Claude接续日志.md
 00_待办与拍板/
 08_发给队友/
+
+# ===== 第三方依赖（原样 vendored 入库，2026-10 改为 pip 安装，见 hw_bridge/requirements.txt）=====
+hw_bridge/vendor/
+hw_bridge/vendor_esp/
+
+# ===== 构建产物（固件 .o/.axf/.bin/flash.log 不入库）=====
+09_固件/build/
+
+# ===== 内部草稿 / 下载的第三方副本（仅本地，避免重复与版权混淆）=====
+_work/
+_download/
+12_视觉/
+
+# ===== 拍摄与算法标注产物（文档用图放在 08_视觉/shots/ 里，"_" 开头的是临时产物）=====
+08_视觉/vision/_*.jpg
+08_视觉/vision/_*.png
+
+# 日志
+*.log
