@@ -45,33 +45,53 @@ except Exception:
 
 
 def find_port():
+    """自动认 STM32 的串口 ✓（**口号会变** ✗，而且必须能说清"为什么没认到" ✓）。
+
+    ⚠️⚠️ 2026-10-08 实测踩坑：`vision_pick.py` 空跑通过、实抓却报 `[FAIL] 没找到 STM32` ✗ ——
+       机构**一步没动**（find_port 在开串口之前就返回 None ✓，安全 ✓），但白等了 30 秒 ✗。
+       原因 = **探测太急**：开串口只等 1.2s、发一条 PING 只等 0.7s ✗，
+       板子若正忙 / 刚被上一次开串口打断，就漏过去了 ✗。
+       ⇒ 现在：**每个口试 2 轮**、等待放宽到 1.5s + 1.0s ✓，
+         并且**把每个口的探测结果打出来** ✓（下次一眼看出是"没回"还是"被占用" ✓）。
+    """
     import serial
     from serial.tools import list_ports as lp
+
     cands, busy = [], []
     for p in lp.comports():
         if "1A86:7522" in (p.hwid or "").upper():
             return p.device
-        cands.append(p.device)
-    for dev in cands:
-        try:
-            s = serial.Serial(dev, 115200, parity=serial.PARITY_EVEN, timeout=0.3,
-                              dsrdtr=False, rtscts=False)
+        cands.append((p.device, p.description or ""))
+    if not cands:
+        print("⚠️ 系统里**一个串口都没有** —— 板子的 USB-TTL 插上了吗？")
+        return None
+
+    for dev, desc in cands:
+        for _round in range(2):
             try:
-                s.dtr = False
-                s.rts = False
-            except Exception:
-                pass
-            time.sleep(1.2)
-            s.reset_input_buffer()
-            s.write(b"PING\r\n")
-            time.sleep(0.7)
-            d = s.read(300)
-            s.close()
-            if b"pong" in d:
-                return dev
-        except Exception as exc:
-            if "Permission" in repr(exc) or "拒绝" in repr(exc):
-                busy.append(dev)
+                s = serial.Serial(dev, 115200, parity=serial.PARITY_EVEN, timeout=0.4,
+                                  dsrdtr=False, rtscts=False)
+                try:
+                    s.dtr = False
+                    s.rts = False
+                except Exception:
+                    pass
+                time.sleep(1.5)
+                s.reset_input_buffer()
+                s.write(b"PING\r\n")
+                time.sleep(1.0)
+                d = s.read(400) or b""
+                s.close()
+                if b"pong" in d:
+                    print("[i] STM32 = %s（%s）" % (dev, desc))
+                    return dev
+                print("    %-6s 探测无应答（收到 %d 字节：%r）" % (dev, len(d), d[:40]))
+            except Exception as exc:
+                if "Permission" in repr(exc) or "拒绝" in repr(exc):
+                    busy.append(dev)
+                    break
+                print("    %-6s 打不开：%s" % (dev, exc))
+                break
     if busy:
         print("⚠️ 串口被占用：%s（先退出其他工具 ✗）" % ", ".join(busy))
     return None

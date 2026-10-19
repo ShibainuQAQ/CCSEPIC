@@ -63,32 +63,168 @@ def imwrite_unicode(path, img):
         return False
 
 
+def radial_profile(cnt, n=360, simplify=0.02):
+    """把轮廓采样成**均匀角度上的半径** r(θ)（返回长度 n 的数组，失败返回 None ✓）。
+
+    三个必须踩对的点（都实测栽过 ✗）：
+      ① 用**凸包**：掩膜的小缺口/毛刺被填平 ✓（比原始轮廓稳得多 ✓）；
+      ② 半径必须按 **"射线与边求交"解析算** ✗ 不能对顶点半径插值 ——
+         凸包的边是**直线**，边中点半径会掉到 R·cos(30°)=0.866R（六边形）✗，
+         插值等于把直边抹平成圆弧 ⇒ **六棱柱被算成"圆"** ✗✗（第一版就是这样 ✗）；
+      ③ 凸包上常残留几十个**近共线**的噪声点（抗锯齿 + 形态学造成 ✗）⇒
+         先用 `approxPolyDP` 按**周长比例**简化，把真正的"角"留下 ✓
+         （不简化的话 r(θ) 太光滑，谐波幅度被抹掉 ⇒ 同样判成圆 ✗）。
+    """
+    hull = cv2.convexHull(cnt)
+    if hull is None or len(hull) < 3:
+        return None
+    peri = cv2.arcLength(hull, True)
+    if simplify > 0 and peri > 0:
+        app = cv2.approxPolyDP(hull, simplify * peri, True)
+        if len(app) >= 3:
+            hull = app
+    m = cv2.moments(hull)
+    if m["m00"] <= 0:
+        return None
+    cx, cy = m["m10"] / m["m00"], m["m01"] / m["m00"]
+    P = hull.reshape(-1, 2).astype(np.float64) - np.array([cx, cy])
+    ang = np.arctan2(P[:, 1], P[:, 0])
+    rad = np.hypot(P[:, 0], P[:, 1])
+    order = np.argsort(ang)
+    ang, rad = ang[order], rad[order]
+    K = len(ang)
+
+    prof = np.full(n, np.nan)
+    grid = np.linspace(ang[0], ang[0] + 2.0 * np.pi, n, endpoint=False)
+    for i in range(K):
+        a1, r1 = ang[i], rad[i]
+        j = (i + 1) % K
+        a2 = ang[j] + (2.0 * np.pi if j <= i else 0.0)
+        r2 = rad[j]
+        span = a2 - a1
+        if span <= 1e-12:
+            continue
+        sel = np.mod(grid - a1, 2.0 * np.pi) < span
+        if not np.any(sel):
+            continue
+        ph = np.mod(grid[sel] - a1, 2.0 * np.pi)
+        # r(φ) = r1·r2·sin(Δ) / [ r2·sin(φ) + r1·sin(Δ−φ) ] ✓
+        den = r2 * np.sin(ph) + r1 * np.sin(span - ph)
+        den = np.where(np.abs(den) < 1e-9, 1e-9, den)
+        prof[sel] = r1 * r2 * np.sin(span) / den
+
+    if not np.isfinite(prof).any():
+        return None
+    if not np.isfinite(prof).all():                 # 极少数没盖到的角度 → 用均值补上 ✓
+        prof[~np.isfinite(prof)] = np.nanmean(prof)
+    if prof.mean() <= 1e-6:
+        return None
+    return prof
+
+
+def symmetry_order(prof, k_max=8):
+    """对 r(θ) 做 FFT，返回 (最小显著谐波阶数 k, 该阶幅度, 全部幅度表) ✓。
+
+    为什么看"阶数"而不是数顶点：**正 n 边形 = n 重旋转对称** ✓ ——
+    正三角形只有 3、6、9… 阶谐波；正六边形只有 6、12… 阶（**没有 3 阶**，
+    因为它绕中心转 180° 不变 ✓）；圆/椭圆则连 3 阶以上都没有 ✓。
+    ⇒ "k≥3 里**最小**的显著谐波"就是对称重数，**这是数顶点给不出的稳定信息** ✓✓。
+    """
+    n = len(prof)
+    spec = np.abs(np.fft.rfft(prof / prof.mean() - 1.0)) * (2.0 / n)
+    harm = {k: float(spec[k]) for k in range(3, k_max + 1) if k < len(spec)}
+    if not harm:
+        return None, 0.0, {}
+    kmax = max(harm, key=harm.get)
+    return kmax, harm[kmax], harm
+
+
+def ngon_residual(prof, n, steps=48):
+    """把 r(θ) 和**正 n 边形**模型对齐后取最小 RMS 残差 ✓（形状判据的核心 ✓）。
+
+    模型：中心到边的距离 r(θ) = cos(π/n) / cos( ((θ−θ0) mod 2π/n) − π/n )，
+    再整体归一化到均值 1（**缩放对形状没意义** ✓），θ0 在 [0, 2π/n) 上扫一遍取最优 ✓。
+    """
+    m = prof / prof.mean()
+    th = np.linspace(0.0, 2.0 * np.pi, len(m), endpoint=False)
+    best = None
+    for t0 in np.linspace(0.0, 2.0 * np.pi / n, steps, endpoint=False):
+        u = np.mod(th - t0, 2.0 * np.pi / n) - np.pi / n
+        mod = np.cos(np.pi / n) / np.cos(u)
+        mod = mod / mod.mean()
+        r = float(np.sqrt(np.mean((m - mod) ** 2)))
+        if best is None or r < best:
+            best = r
+    return best if best is not None else 1.0
+
+
+def ellipse_residual(prof):
+    """**椭圆模型**的 RMS 残差 ✓ —— 去掉直流 + 1、2 阶谐波（= 一个椭圆能解释的全部）✗。
+
+    为什么必须有它：相机有俯角 ⇒ **圆柱的顶面在画面里是椭圆，不是圆** ✗；
+    而"圆柱"和"六棱柱"的差别不在圆度（六棱柱也很圆 ✗），
+    而在"**除了椭圆之外还剩多少结构**"✓ —— 这正是这个残差衡量的东西 ✓。
+    """
+    n = len(prof)
+    th = np.linspace(0.0, 2.0 * np.pi, n, endpoint=False)
+    A = np.column_stack([np.ones(n), np.cos(th), np.sin(th),
+                         np.cos(2 * th), np.sin(2 * th)])
+    y = prof / prof.mean()
+    coef, *_ = np.linalg.lstsq(A, y, rcond=None)
+    return float(np.sqrt(np.mean((y - A @ coef) ** 2)))
+
+
 def shape_of(cnt, area):
-    """根据轮廓判断形状名（俯视视角 ✓）。"""
-    peri = cv2.arcLength(cnt, True)
-    if peri <= 0:
+    """根据轮廓判断形状名（俯视视角 ✓）。
+
+    ⚠️⚠️ 2026-10-08 **重写**：旧判据是"`approxPolyDP` 数顶点 + 圆度"，**实机上极不稳定** ✗✗ ——
+       同一天连拍两张，同一件绿色六棱柱会在 `hexagon(六棱柱)` 和 `poly7x(接近圆/多边)`
+       之间来回跳 ✗（顶点数对光照/抗锯齿/掩膜边缘的一两个像素太敏感 ✗）。
+       后果：`vision_pick.py --shape hex` **时好时坏，空跑直接选不到货** ✗（实测踩到 ✓）。
+
+    新判据 = **角向对称阶数**（见 `radial_profile` / `symmetry_order` 的注释 ✓）：
+      · 最小显著谐波 k = **3/4/5/6** ⇒ 三角形 / 正方形 / 五边形 / **六棱柱** ✓
+      · k≥3 的谐波**全都很小** ⇒ 圆 / 椭圆（圆柱俯视 + 相机俯角 ✓）
+    """
+    prof = radial_profile(cnt)
+    if prof is None:
         return "?"
-    circ = 4.0 * np.pi * area / (peri * peri)          # 圆度：圆=1，方块≈0.785
-    approx = cv2.approxPolyDP(cnt, 0.03 * peri, True)
-    n = len(approx)
+    kmax, amp, harm = symmetry_order(prof)
+    if kmax is None:
+        return "?"
+
     x, y, w, h = cv2.boundingRect(cnt)
     aspect = w / float(h) if h else 0.0
 
-    if circ > 0.85:
-        return "circle(圆)"
-    if n == 3:
-        return "triangle(三棱柱/三角形)"
-    if n == 4:
+    # ① **主阶明确** ⇒ 就是多边形，阶数 = 对称重数 ✓
+    #    判据 = 最高阶既够大（≥0.030）又明显压过第二阶（≥1.45 倍）✓
+    #    为什么不能只看绝对值 ✗：实测**不规则的圆斑**（黄圆柱的掩膜把顶面+侧面连成花生形 ✗）
+    #    各阶谐波都在 0.013~0.036 之间、"最高阶"纯属噪声 ✗ ——
+    #    而真六棱柱是 0.039（第二阶 0.025）⇒ 两者绝对值几乎撞上 ✗，
+    #    只有"**有没有明显压过第二名**"能把它们分开 ✓。
+    vals = sorted(harm.values(), reverse=True)
+    second = vals[1] if len(vals) > 1 else 0.0
+    dominant = (amp >= 0.030) and (second <= 1e-9 or amp >= 1.45 * second)
+
+    # ② 没有主阶：能被**椭圆**解释 ⇒ 圆 / 圆柱（相机有俯角，圆柱顶面在画面里是椭圆 ✓）
+    if not dominant:
+        if ellipse_residual(prof) < 0.08:
+            return "circle(圆/圆柱)"
+        # ③ 既没主阶、又不像椭圆 ⇒ **不硬猜**，明确报"不规则"，让人去查掩膜/光照 ✓
+        #    （比随便给个名字强 ✓ —— 分拣规则里"形状判错 = 整盒清零" ✗✗）
+        return "?irregular(不规则-查掩膜/光照)"
+
+    if kmax == 3:
+        return "triangle(三棱柱/三棱锥)"
+    if kmax == 4:
         if 0.85 <= aspect <= 1.18:
-            return "square-ish(正方体/四棱锥/长方体 俯视都是方形)"
+            return "square-ish(正方体/四棱锥)"
         return "rect(长方形)"
-    if n == 5:
+    if kmax == 5:
         return "pentagon(五边形)"
-    if n == 6:
+    if kmax == 6:
         return "hexagon(六棱柱)"
-    if n >= 7:
-        return "poly%dx(接近圆/多边)" % n
-    return "n=%d" % n
+    return "poly%dx(接近圆/多边)" % kmax
 
 
 def detect(img, min_area):

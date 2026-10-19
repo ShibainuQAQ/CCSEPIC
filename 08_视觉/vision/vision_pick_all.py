@@ -14,7 +14,7 @@
    · 流程结束一律"Z 最高 + 原地停住" ✓
 
 用法：
-  D:\\python\\python.exe 12_视觉\\vision\\vision_pick_all.py --color green
+  D:\\python\\python.exe 08_视觉\\vision\\vision_pick_all.py --color green
   ... --step -70 0     # 每件放置点的偏移（默认往 −X 叠 70mm ✓）
   ... --max 6          # 最多抓几件（防跑飞 ✓）
 """

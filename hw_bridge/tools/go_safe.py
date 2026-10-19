@@ -31,6 +31,11 @@ SMM = 80
 
 
 def find_stm32():
+    """自动认 STM32 串口 ✓（**每个口试 2 轮、等待放宽** —— 同 pick_place 的坑 ✗）。
+
+    ⚠️ 2026-10-08：`pick_place.py` 实测因"开串口只等 1.2s + 只等 0.7s 回执"而**误报找不到板子** ✗
+       （机构白等 30 秒 ✗）。这里同样改成 2 轮 + 1.5s/1.0s ✓，并把失败原因打出来 ✓。
+    """
     import serial
     from serial.tools import list_ports as lp
     cands = []
@@ -38,25 +43,31 @@ def find_stm32():
         if "1A86:7522" in (p.hwid or "").upper():
             return p.device
         cands.append(p.device)
+    if not cands:
+        print("⚠️ 系统里一个串口都没有 —— USB-TTL 插了吗？")
+        return None
     for dev in cands:
-        try:
-            s = serial.Serial(dev, 115200, parity=serial.PARITY_EVEN, timeout=0.3,
-                              dsrdtr=False, rtscts=False)
+        for _round in range(2):
             try:
-                s.dtr = False
-                s.rts = False
-            except Exception:
-                pass
-            time.sleep(1.2)
-            s.reset_input_buffer()
-            s.write(b"PING\r\n")
-            time.sleep(0.7)
-            d = s.read(300)
-            s.close()
-            if b"pong" in d:
-                return dev
-        except Exception:
-            continue
+                s = serial.Serial(dev, 115200, parity=serial.PARITY_EVEN, timeout=0.4,
+                                  dsrdtr=False, rtscts=False)
+                try:
+                    s.dtr = False
+                    s.rts = False
+                except Exception:
+                    pass
+                time.sleep(1.5)
+                s.reset_input_buffer()
+                s.write(b"PING\r\n")
+                time.sleep(1.0)
+                d = s.read(400) or b""
+                s.close()
+                if b"pong" in d:
+                    return dev
+                print("    %-6s 探测无应答（收到 %d 字节）" % (dev, len(d)))
+            except Exception as exc:                       # noqa: BLE001
+                print("    %-6s 打不开：%s" % (dev, exc))
+                break
     return None
 
 
